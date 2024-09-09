@@ -2,6 +2,10 @@
 #include "StateVariableFilter.h"
 #include "DelayLine.h"
 #include "dsp.h"
+#include "Filter.h"
+#include "ParameterInterpolator.h"
+#include "CosineOscillator.h"
+
 
 namespace DSP {
 
@@ -22,7 +26,7 @@ public:
     void prepare(double sampleRate);
 
     // Process resonator output for a buffer
-    void process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples);
+    void process(const float* in, float* out, float* aux, size_t size);
 
     // Process a single sample of the resonator
     float process();
@@ -51,8 +55,8 @@ private:
     int ComputeFilters();
 
     // StateVariableFilter array for each resonator mode
-    std::vector<DSP::StateVariableFilter> filters;  
-
+    // std::vector<DSP::StateVariableFilter> filters;  
+    DSP::Svf svf[kMaxModes];
 
 
 

@@ -14,16 +14,31 @@ Resonator::~Resonator()
 
 void Resonator::prepare(double sampleRate)
 {
-    // Initialize filters with the sample rate
-    for (int i = 0; i < kMaxModes; ++i) {
-        filters[i].prepare(sampleRate);
-    }
 
 }
 
-void Resonator::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)
+void Resonator::process(const float* in, float* out, float* aux, size_t size)
 {
-
+    int num_modes = ComputeFilters();
+  
+    ParameterInterpolator position (&previous_position, position, size);
+    
+    while (size--) 
+    {
+    CosineOscillator amplitudes;
+    amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position.Next());
+    
+    float input = *in++ * 0.125f;
+    float odd = 0.0f;
+    float even = 0.0f;
+    amplitudes.Start();
+    for (int32_t i = 0; i < num_modes;) {
+      odd += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
+      even += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
+    }
+    *out++ = odd;
+    *aux++ = even;
+  }
 
 }
 
@@ -110,6 +125,7 @@ int Resonator::ComputeFilters()
           num_modes = i + 1;
         }
         
+        svf[i].set_f_q<FREQUENCY_FAST>(partial_frequency,1.0f + partial_frequency * q);
         // filters[i].(partial_frequency, 1.0f + partial_frequency * q);
         
         stretch_factor += stiffness;
