@@ -21,12 +21,12 @@ void Resonator::process(const float* in, float* out, float* aux, size_t size)
 {
     int num_modes = ComputeFilters();
   
-    ParameterInterpolator position (&previous_position, position, size);
+    ParameterInterpolator position_ (&previous_position, position, size);
     
     while (size--) 
     {
     CosineOscillator amplitudes;
-    amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position.Next());
+    amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position_.Next());
     
     float input = *in++ * 0.125f;
     float odd = 0.0f;
@@ -39,7 +39,6 @@ void Resonator::process(const float* in, float* out, float* aux, size_t size)
     *out++ = odd;
     *aux++ = even;
   }
-
 }
 
 void Resonator::setFrequency(float freqHz)
