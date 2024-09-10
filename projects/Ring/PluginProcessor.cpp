@@ -117,11 +117,17 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
     juce::ScopedNoDenormals noDenormals;
     parameterManager.updateParameters();
 
+    const unsigned int numChannels{ static_cast<unsigned int>(buffer.getNumChannels()) };
+    const unsigned int numSamples{ static_cast<unsigned int>(buffer.getNumSamples()) };
+
     {
         juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
         juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
         filter.process(ctx);
     }
+
+    resonator.process(buffer.getArrayOfWritePointers(), buffer.getArrayOfReadPointers(), numChannels, numSamples);
+
 
     outputGain.applyGain(buffer, buffer.getNumSamples());
 }

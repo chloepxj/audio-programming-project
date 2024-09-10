@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "algorithm"
 #include "StateVariableFilter.h"
 #include "DelayLine.h"
@@ -30,6 +29,7 @@ public:
 
     // Process resonator output for a buffer
     void process(const float* in, float* out, float* aux, size_t size);
+    void process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples);
 
     // Process a single sample of the resonator
     float process();
