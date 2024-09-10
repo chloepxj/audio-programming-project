@@ -136,7 +136,9 @@ add_plugin(ringsynth
     SOURCES
         ${ring_source}/PluginEditor.cpp
         ${ring_source}/PluginProcessor.cpp
-        #${dsp_source}/RingMod.cpp
+        ${dsp_source}/Resonator.cpp
+        ${dsp_source}/Resources.cpp
+        
     INCLUDE_DIRS
         ${dsp_source}
         ${ring_source})

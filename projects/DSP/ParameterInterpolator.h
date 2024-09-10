@@ -1,5 +1,7 @@
-#include "cmath"
+#pragma once
 
+
+#include "cmath"
 
 namespace DSP {
 

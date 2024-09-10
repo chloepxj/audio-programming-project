@@ -7,22 +7,34 @@ namespace Param
 {
     namespace ID
     {
+        static const juce::String Enabled { "enabled" };
+        static const juce::String Drive { "drive" };
+        static const juce::String CutoffFreq { "cutoff_frequency" };
+        static const juce::String Resonance { "resonance" };
+        static const juce::String Mode { "mode" };
+
         static const juce::String Frequency { "frequency" };
         static const juce::String Structure { "structure" };
         static const juce::String Brightness { "brightness" };
         static const juce::String Damping { "damping" };
         static const juce::String Position { "position" };
-        // static const juce::String PostGain { "post_gain" };
+        static const juce::String PostGain { "post_gain" };
     }
 
     namespace Name
     {
+        static const juce::String Enabled { "Enabled" };
+        static const juce::String Drive { "Drive" };
+        static const juce::String CutoffFreq { "Cutoff-Frequency" };
+        static const juce::String Resonance { "Resonance" };
+        static const juce::String Mode { "Mode" };
+
         static const juce::String Frequency { "Frequency" };
         static const juce::String Structure { "Structure" };
         static const juce::String Brightness { "Brightness" };
         static const juce::String Damping { "Damping" };
         static const juce::String Position { "Position" };
-        // static const juce::String PostGain { "Post-Gain" };
+        static const juce::String PostGain { "Post-Gain" };
     }
 }
 
@@ -58,11 +70,14 @@ public:
 
 private:
     mrta::ParameterManager parameterManager;
-
+    
+    // LPF
+    juce::dsp::LadderFilter<float> filter;
+    
+    // Resonator
     DSP::Resonator resonator;
 
-    // juce::dsp::LadderFilter<float> filter;
-    // juce::SmoothedValue<float> outputGain;
+    juce::SmoothedValue<float> outputGain;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainProcessor)
 };

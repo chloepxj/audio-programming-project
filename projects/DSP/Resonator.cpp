@@ -14,7 +14,18 @@ Resonator::~Resonator()
 
 void Resonator::prepare(double sampleRate)
 {
-
+    for (int i = 0; i < kMaxModes; ++i) 
+    {
+        svf[i].Init();
+    }
+    
+    setFrequency(220.0f / sampleRate);
+    setStructure(0.25f);
+    setBrightness(0.5f);
+    setDamping(0.3f);
+    setPosition(0.999f);
+    previous_position = 0.0f;
+    setResolution(kMaxModes);
 }
 
 void Resonator::process(const float* in, float* out, float* aux, size_t size)
@@ -75,30 +86,11 @@ void Resonator::setResolution(int newResolution)
 int Resonator::ComputeFilters()
 {
     float stiffness = Interpolate(lut_stiffness, structure, 256.0f);
-    // linear interpolation to get stiffness
-    // const int lut_size = 256;
-    // const float m { std::fmax(structure, 0.f) * lut_size }; // structure [0, 1]
-    // const float mInt { std::floor(m) };
-    // const float mFrac { m - mInt };
-
-    // // Calculate read indices
-    // const unsigned int readIndex0 { (lut_size - static_cast<unsigned int>(mInt)) % lut_size };
-    // const unsigned int readIndex1 { (readIndex0 + lut_size + 1u) % lut_size };
-
-    // // Read from look up table
-    // const float read0 = lut_stiffness[readIndex0];
-    // const float read1 = lut_stiffness[readIndex1];
-
-    // //a + (b - a) * index_fractional;
-    // float stiffness = read0 + (read1 - read0) * mFrac;
-    //
 
     float harmonic = frequency;
     float stretch_factor = 1.0f;
 
     float q = 500.0f * Interpolate(lut_4_decades, damping, 256.0f);
-
-
 
     float brightness_attenuation = 1.0f - structure;
     // Reduces the range of brightness when structure is very low, to prevent

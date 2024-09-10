@@ -1,3 +1,6 @@
+#pragma once
+
+
 #include "algorithm"
 #include "StateVariableFilter.h"
 #include "DelayLine.h"

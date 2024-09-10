@@ -1,3 +1,6 @@
+#pragma once
+
+
 namespace DSP {
 
 // typedef uint8_t ResourceId;
