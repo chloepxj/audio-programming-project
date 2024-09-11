@@ -23,18 +23,20 @@ void Resonator::prepare(double sampleRate)
         
     }
     
-    setFrequency(220.0f / sampleRate);
+    setFrequency(220.0f);
     setStructure(0.25f);
     setBrightness(0.5f);
     setDamping(0.3f);
     setPosition(0.999f);
     previous_position = 0.0f;
     setResolution(kMaxModes);
+
+    // num_modes = ComputeFilters();
 }
 
 void Resonator::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)
 {
-    int num_modes = ComputeFilters();
+    num_modes = ComputeFilters();
     
     ParameterInterpolator position_ (&previous_position, position, static_cast<size_t>(numSamples));
     
@@ -71,7 +73,7 @@ void Resonator::process(float* const* output, const float* const* input, unsigne
 }
 void Resonator::process(const float* in, float* out, float* aux, size_t size)
 {
-    int num_modes = ComputeFilters();
+    num_modes = ComputeFilters();
   
     ParameterInterpolator position_ (&previous_position, position, size);
     
@@ -97,13 +99,13 @@ void Resonator::process(const float* in, float* out, float* aux, size_t size)
 
 void Resonator::setFrequency(float freqHz)
 {
-    frequency = freqHz;
+    frequency = freqHz/sampleRate;
 }
 
 void Resonator::setStructure(float newStructure)
 {
     structure = newStructure;
-    stiffness = Interpolate(lut_stiffness, structure, 256.0f);
+    // stiffness = Interpolate(lut_stiffness, structure, 256.0f);
 }
 
 void Resonator::setBrightness(float newBrightness)
@@ -134,6 +136,7 @@ int Resonator::ComputeFilters()
     float harmonic = frequency;
     float stretch_factor = 1.0f;
 
+    // test_q = Interpolate(lut_4_decades, damping, 256.0f);
     float q = 500.0f * Interpolate(lut_4_decades, damping, 256.0f);
 
     float brightness_attenuation = 1.0f - structure;
@@ -143,14 +146,16 @@ int Resonator::ComputeFilters()
     brightness_attenuation *= brightness_attenuation;
     brightness_attenuation *= brightness_attenuation;
 
-    float brightness = brightness * (1.0f - 0.2f * brightness_attenuation);
-    float q_loss = brightness * (2.0f - brightness) * 0.85f + 0.15f;
+    float brightness_ = brightness * (1.0f - 0.2f * brightness_attenuation);
+    float q_loss = brightness_ * (2.0f - brightness_) * 0.85f + 0.15f;
     float q_loss_damping_rate = structure * (2.0f - structure) * 0.1f;
     int num_modes = 0;
     
-    for (int i = 0; i < std::min(kMaxModes, resolution); ++i) 
+
+    for (int i = 0; i < std::min(kMaxModes, resolution); ++i)  //0 ~ 64
     {
         float partial_frequency = harmonic * stretch_factor;
+
         if (partial_frequency >= 0.49f) 
         {
             partial_frequency = 0.49f;

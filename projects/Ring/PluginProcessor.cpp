@@ -60,15 +60,15 @@ MainProcessor::MainProcessor() :
     [this] (float value, bool /*forced*/)
     {
         resonator.setFrequency(value);
+        DBG("num_modes: " + ::juce::String(resonator.num_modes));
     });
 
     parameterManager.registerParameterCallback(Param::ID::Structure,
     [this] (float value, bool /*forced*/)
     {
         resonator.setStructure(value);
-        // DBG("structure: " + ::juce::String(value));
-
-        DBG("stiffness: " + ::juce::String(resonator.stiffness));
+        float num_mode = resonator.ComputeFilters();
+        DBG("num_modes: " + ::juce::String(num_mode)); 
 
     });
 
@@ -82,6 +82,7 @@ MainProcessor::MainProcessor() :
     [this] (float value, bool /*forced*/)
     {
         resonator.setDamping(value);
+        // DBG("test_q: " + juce::String(resonator.test_q)); GOOD
     });
 
     parameterManager.registerParameterCallback(Param::ID::Position,
