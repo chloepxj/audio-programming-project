@@ -125,7 +125,7 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
         juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
         filter.process(ctx);
     }
-
+    // filter.process();
     resonator.process(buffer.getArrayOfWritePointers(), buffer.getArrayOfReadPointers(), numChannels, numSamples);
 
 

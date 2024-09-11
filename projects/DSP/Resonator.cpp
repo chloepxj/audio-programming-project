@@ -17,7 +17,7 @@ void Resonator::prepare(double sampleRate)
 {
     for (int i = 0; i < kMaxModes; ++i) 
     {
-        svf[i].Init();
+        SVFs[i].prepare(sampleRate);
     }
     
     setFrequency(220.0f / sampleRate);
@@ -28,6 +28,7 @@ void Resonator::prepare(double sampleRate)
     previous_position = 0.0f;
     setResolution(kMaxModes);
 }
+
 void Resonator::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)
 {
     int num_modes = ComputeFilters();
@@ -148,11 +149,11 @@ int Resonator::ComputeFilters()
         float partial_frequency = harmonic * stretch_factor;
         if (partial_frequency >= 0.49f) 
         {
-          partial_frequency = 0.49f;
+            partial_frequency = 0.49f;
         } 
         else 
         {
-          num_modes = i + 1;
+            num_modes = i + 1;
         }
         
         svf[i].set_f_q<FREQUENCY_FAST>(partial_frequency,1.0f + partial_frequency * q);
