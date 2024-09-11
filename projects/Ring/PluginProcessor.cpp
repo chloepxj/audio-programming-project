@@ -11,7 +11,7 @@ static const std::vector<mrta::ParameterInfo> ParameterInfos
     { Param::ID::Resonance,     Param::Name::Resonance,   "",     0.f,      0.f,     1.f,        0.001f,   1.f },
     { Param::ID::Mode,          Param::Name::Mode,        { "LPF12", "HPF12", "BPF12", "LPF24", "HPF24", "BPF24" }, 3 },
 
-    { Param::ID::Frequency,     Param::Name::Frequency,   "Hz",   100.f,    20.f,    20000.f,    1.f,      0.3f},
+    { Param::ID::Frequency,     Param::Name::Frequency,   "Hz",   440.f,    27.f,    4186.f,     1.f,      0.3f},
     { Param::ID::Structure,     Param::Name::Structure,   "",     0.25f,    0.f,     0.9995f,    0.001f,   1.f },
     { Param::ID::Brightness,    Param::Name::Brightness,  "",     0.5f,     0.f,     1.f,        0.001f,   1.f },
     { Param::ID::Damping,       Param::Name::Damping,     "",     0.3f,     0.f,     1.f,        0.001f,   1.f },
