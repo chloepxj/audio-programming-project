@@ -138,8 +138,8 @@ int Resonator::ComputeFilters()
     brightness_attenuation *= brightness_attenuation;
     brightness_attenuation *= brightness_attenuation;
 
-    float brightness = brightness * (1.0f - 0.2f * brightness_attenuation);
-    float q_loss = brightness * (2.0f - brightness) * 0.85f + 0.15f;
+    float newBrightness = brightness * (1.0f - 0.2f * brightness_attenuation);
+    float q_loss = newBrightness * (2.0f - newBrightness) * 0.85f + 0.15f;
     float q_loss_damping_rate = structure * (2.0f - structure) * 0.1f;
     int num_modes = 0;
     
