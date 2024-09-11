@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "juce_core/system/juce_PlatformDefs.h"
 
 static const std::vector<mrta::ParameterInfo> ParameterInfos
 {             
@@ -32,6 +33,7 @@ MainProcessor::MainProcessor() :
     [this] (float value, bool /*forced*/)
     {
         filter.setDrive(value);
+        // DBG("drive: " + juce::String{value});
     });
 
     parameterManager.registerParameterCallback(Param::ID::CutoffFreq,
@@ -58,12 +60,16 @@ MainProcessor::MainProcessor() :
     [this] (float value, bool /*forced*/)
     {
         resonator.setFrequency(value);
+        DBG("num_modes: " + ::juce::String(resonator.num_modes));
     });
 
     parameterManager.registerParameterCallback(Param::ID::Structure,
     [this] (float value, bool /*forced*/)
     {
         resonator.setStructure(value);
+        float num_mode = resonator.ComputeFilters();
+        DBG("num_modes: " + ::juce::String(num_mode)); 
+
     });
 
     parameterManager.registerParameterCallback(Param::ID::Brightness,
@@ -76,6 +82,7 @@ MainProcessor::MainProcessor() :
     [this] (float value, bool /*forced*/)
     {
         resonator.setDamping(value);
+        // DBG("test_q: " + juce::String(resonator.test_q)); GOOD
     });
 
     parameterManager.registerParameterCallback(Param::ID::Position,
@@ -125,7 +132,7 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
         juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
         filter.process(ctx);
     }
-
+    // filter.process();
     resonator.process(buffer.getArrayOfWritePointers(), buffer.getArrayOfReadPointers(), numChannels, numSamples);
 
 

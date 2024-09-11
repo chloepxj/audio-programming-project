@@ -3,12 +3,18 @@
 
 MainProcessorEditor::MainProcessorEditor(MainProcessor& p) :
     AudioProcessorEditor(&p), audioProcessor(p),
-    genericParameterEditor(audioProcessor.getParameterManager())
+    LPFParameterEditor(audioProcessor.getParameterManager(), ParamHeight,
+                        { Param::ID::Enabled, Param::ID::Drive, Param::ID::CutoffFreq, Param::ID::Resonance, Param::ID::Mode }),
+    ResonatorParameterEditor(audioProcessor.getParameterManager(), ParamHeight, 
+                        {Param::ID::Frequency, Param::ID::Structure, Param::ID::Brightness, Param::ID::Damping, Param::ID::PostGain})
+    
 {
-    int height = static_cast<int>(audioProcessor.getParameterManager().getParameters().size())
-               * genericParameterEditor.parameterWidgetHeight;
-    setSize(300, height);
-    addAndMakeVisible(genericParameterEditor);
+    // setLookAndFeel(&laf);
+    addAndMakeVisible(LPFParameterEditor);
+    addAndMakeVisible(ResonatorParameterEditor);
+
+    setSize(NumOfBands * BandWidth, ParamsPerBand * ParamHeight);
+
 }
 
 MainProcessorEditor::~MainProcessorEditor()
@@ -22,5 +28,8 @@ void MainProcessorEditor::paint (juce::Graphics& g)
 
 void MainProcessorEditor::resized()
 {
-    genericParameterEditor.setBounds(getLocalBounds());
+    auto localBounds { getLocalBounds() };
+    LPFParameterEditor.setBounds(localBounds.removeFromLeft(BandWidth));
+    ResonatorParameterEditor.setBounds(localBounds);
+    
 }

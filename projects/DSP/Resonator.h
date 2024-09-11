@@ -41,6 +41,11 @@ public:
     void setPosition(float newPosition);
     void setResolution(int newResolution);
     
+    // float stiffness {0.f};
+    int num_modes {0};
+    float test_q {0.f};
+    int ComputeFilters();
+
 
 private:
 
@@ -55,11 +60,12 @@ private:
     int resolution {kMaxModes};
 
 
-    int ComputeFilters();
+    // int ComputeFilters();
 
     // StateVariableFilter array for each resonator mode
     // std::vector<DSP::StateVariableFilter> filters;  
     DSP::Svf svf[kMaxModes];
+    // DSP::StateVariableFilter SVFs[kMaxModes];
 
 
 
