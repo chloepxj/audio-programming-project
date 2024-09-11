@@ -2,6 +2,7 @@
 #include "Oscillator.h"
 #include "Resources.h"
 #include "Ramp.h"
+#include <string>
 
 namespace DSP {
 
@@ -17,7 +18,9 @@ void Resonator::prepare(double sampleRate)
 {
     for (int i = 0; i < kMaxModes; ++i) 
     {
-        SVFs[i].prepare(sampleRate);
+        //SVFs[i].prepare(sampleRate);
+        svf[i].Init();
+        
     }
     
     setFrequency(220.0f / sampleRate);
@@ -100,6 +103,7 @@ void Resonator::setFrequency(float freqHz)
 void Resonator::setStructure(float newStructure)
 {
     structure = newStructure;
+    stiffness = Interpolate(lut_stiffness, structure, 256.0f);
 }
 
 void Resonator::setBrightness(float newBrightness)
