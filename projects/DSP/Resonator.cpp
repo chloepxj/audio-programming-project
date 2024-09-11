@@ -81,7 +81,7 @@ void Resonator::process(const float* in, float* out, float* aux, size_t size)
         float even = 0.0f;
         amplitudes.Start();
 
-        for (int i = 0; i < num_modes;) //process throught each filter 
+        for (int i = 0; i < num_modes;) //process through each filter 
         {
             odd += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
             even += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
