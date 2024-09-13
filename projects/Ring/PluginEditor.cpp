@@ -6,7 +6,7 @@ MainProcessorEditor::MainProcessorEditor(MainProcessor& p) :
     LPFParameterEditor(audioProcessor.getParameterManager(), ParamHeight,
                         { Param::ID::Enabled, Param::ID::Drive, Param::ID::CutoffFreq, Param::ID::Resonance, Param::ID::Mode }),
     ResonatorParameterEditor(audioProcessor.getParameterManager(), ParamHeight, 
-                        {Param::ID::Frequency, Param::ID::Structure, Param::ID::Brightness, Param::ID::Damping, Param::ID::PostGain})
+                        {Param::ID::Frequency, Param::ID::Structure, Param::ID::Brightness, Param::ID::Damping, Param::ID::Position, Param::ID::PostGain})
     
 {
     // setLookAndFeel(&laf);
