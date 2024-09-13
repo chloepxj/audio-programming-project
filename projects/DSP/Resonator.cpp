@@ -42,21 +42,23 @@ void Resonator::process(float* const* output, const float* const* input, unsigne
     ParameterInterpolator position_ (&previous_position, position, static_cast<size_t>(numSamples));
     
     numChannels = std::min(numChannels, 2u);
+
     for (unsigned int n = 0; n < numSamples; ++n)
     {
         CosineOscillator amplitudes;
         amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position_.Next());
 
         // float in = 0.125f * input[n];
-        float odd = 0.0f;
-        float even = 0.0f;
+        float odd;
+        float even;
         amplitudes.Start();
         
-        float x[2];
-        for (unsigned int ch = 0; ch < numChannels; ++ch)
-        {
-            x[ch] = 0.125f * input[ch][n];
-        }
+        // copy one channel from input buffer
+        float x = 0.125f * input[0][n];
+        // for (unsigned int ch = 0; ch < numChannels; ++ch)
+        // {
+        //     x[ch] = 0.125f * input[ch][n];
+        // }
         // for (unsigned int ch = 0; ch < numChannels; ++ch)
         // {
             // output[ch][n] = lfo[ch] * input[ch][n];
@@ -64,39 +66,45 @@ void Resonator::process(float* const* output, const float* const* input, unsigne
 
         for (int i = 0; i < num_modes;) //process through each filter 
         {
-            output[0][n] += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x[0]);
-            output[1][n] += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x[1]);
+            odd = amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x);
+            output[0][n] += odd;
+
+            even = amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x);
+            output[1][n] += even;
 
         }
         // }
 
+        
+        // output[1][n] += even;
+
     }
 }
-void Resonator::process(const float* in, float* out, float* aux, size_t size)
-{
-    int num_modes = ComputeFilters();
+// void Resonator::process(const float* in, float* out, float* aux, size_t size)
+// {
+//     int num_modes = ComputeFilters();
   
-    ParameterInterpolator position_ (&previous_position, position, size);
+//     ParameterInterpolator position_ (&previous_position, position, size);
     
-    while (size--) 
-    {
-        CosineOscillator amplitudes;
-        amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position_.Next());
+//     while (size--) 
+//     {
+//         CosineOscillator amplitudes;
+//         amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position_.Next());
 
-        float input = *in++ * 0.125f;
-        float odd = 0.0f;
-        float even = 0.0f;
-        amplitudes.Start();
+//         float input = *in++ * 0.125f;
+//         float odd = 0.0f;
+//         float even = 0.0f;
+//         amplitudes.Start();
 
-        for (int i = 0; i < num_modes;) //process through each filter 
-        {
-            odd += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
-            even += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
-        }
-        *out++ = odd;
-        *aux++ = even;
-    }
-}
+//         for (int i = 0; i < num_modes;) //process through each filter 
+//         {
+//             odd += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
+//             even += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
+//         }
+//         *out++ = odd;
+//         *aux++ = even;
+//     }
+// }
 
 void Resonator::setFrequency(float freqHz)
 {
