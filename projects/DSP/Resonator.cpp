@@ -62,7 +62,7 @@ void Resonator::process(float* const* output, const float* const* input, unsigne
             // output[ch][n] = lfo[ch] * input[ch][n];
             //output[ch][n] = 0.125f * input[ch][n];
 
-        for (int i = 0; i < num_modes;) //process throught each filter 
+        for (int i = 0; i < num_modes;) //process through each filter 
         {
             output[0][n] += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x[0]);
             output[1][n] += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x[1]);
@@ -88,7 +88,7 @@ void Resonator::process(const float* in, float* out, float* aux, size_t size)
         float even = 0.0f;
         amplitudes.Start();
 
-        for (int i = 0; i < num_modes;) //process throught each filter 
+        for (int i = 0; i < num_modes;) //process through each filter 
         {
             odd += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
             even += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
