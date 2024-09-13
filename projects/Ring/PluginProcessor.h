@@ -2,11 +2,18 @@
 
 #include <JuceHeader.h>
 #include "Resonator.h"
+#include "SynthVoice.h"
+
+#include "mrta_utils/Source/Parameter/ParameterManager.h"
+
 
 namespace Param
 {
     namespace ID
     {
+        static const juce::String AttRelTime { "att_rel_time" };
+        static const juce::String WaveType { "wave_type" };
+
         static const juce::String Enabled { "enabled" };
         static const juce::String Drive { "drive" };
         static const juce::String CutoffFreq { "cutoff_frequency" };
@@ -23,6 +30,9 @@ namespace Param
 
     namespace Name
     {
+        static const juce::String AttRelTime { "Att. Rel. Time" };
+        static const juce::String WaveType { "Wave Type" };
+
         static const juce::String Enabled { "Enabled" };
         static const juce::String Drive { "Drive" };
         static const juce::String CutoffFreq { "Cutoff-Frequency" };
@@ -35,6 +45,15 @@ namespace Param
         static const juce::String Damping { "Damping" };
         static const juce::String Position { "Position" };
         static const juce::String PostGain { "Post-Gain" };
+    }
+    namespace Ranges
+    {
+        static constexpr float AttRelTimeMin { 1.f };
+        static constexpr float AttRelTimeMax { 1000.f };
+        static constexpr float AttRelTimeInc { 0.1f };
+        static constexpr float AttRelTimeSkw { 0.5f };
+
+        static const juce::StringArray WaveType { "Sine", "Tri. Aliased", "Saw Aliased", "Tri. AA", "Saw AA" };
     }
 }
 
@@ -71,9 +90,12 @@ public:
 private:
     mrta::ParameterManager parameterManager;
     
+    // juce::Synthesiser synth;
+    // DSP::SynthVoice* voice { nullptr };   
+
     // LPF
-    juce::dsp::LadderFilter<float> filter;
-    
+    juce::dsp::LadderFilter<float> filter; 
+
     // Resonator
     DSP::Resonator resonator;
 

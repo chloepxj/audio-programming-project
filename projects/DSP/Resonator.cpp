@@ -2,6 +2,7 @@
 #include "Oscillator.h"
 #include "Resources.h"
 #include "Ramp.h"
+#include "SynthVoice.h"
 #include <string>
 
 namespace DSP {
@@ -36,7 +37,7 @@ void Resonator::prepare(double sampleRate)
 
 void Resonator::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)
 {
-    num_modes = ComputeFilters();
+    int num_modes = ComputeFilters();
     
     ParameterInterpolator position_ (&previous_position, position, static_cast<size_t>(numSamples));
     
@@ -73,7 +74,7 @@ void Resonator::process(float* const* output, const float* const* input, unsigne
 }
 void Resonator::process(const float* in, float* out, float* aux, size_t size)
 {
-    num_modes = ComputeFilters();
+    int num_modes = ComputeFilters();
   
     ParameterInterpolator position_ (&previous_position, position, size);
     
