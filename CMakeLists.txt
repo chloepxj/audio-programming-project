@@ -138,6 +138,9 @@ add_plugin(ringsynth
         ${ring_source}/PluginProcessor.cpp
         ${dsp_source}/Resonator.cpp
         ${dsp_source}/Resources.cpp
+        ${dsp_source}/SynthVoice.cpp
+        ${dsp_source}/Oscillator.cpp
+
         
     INCLUDE_DIRS
         ${dsp_source}

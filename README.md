@@ -74,3 +74,10 @@ These files are part of a real-time audio processing system, likely for a synthe
 
 (add more about how to use the dsp classes in rings/dsp, which is the modal resonator part)
 
+
+TODO
+- midi handler
+- stereo
+- freqMod
+- GUI
+- polyphony ? 

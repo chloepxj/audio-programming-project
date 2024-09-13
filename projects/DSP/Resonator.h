@@ -42,8 +42,8 @@ public:
     void setResolution(int newResolution);
     
     // float stiffness {0.f};
-    int num_modes {0};
-    float test_q {0.f};
+    // int num_modes {0};
+    // float test_q {0.f};
     int ComputeFilters();
 
 
@@ -57,6 +57,7 @@ private:
     float position { 0.999f };
     float previous_position { 0.0f };
     float damping { 0.3f };
+
     int resolution {kMaxModes};
 
 
