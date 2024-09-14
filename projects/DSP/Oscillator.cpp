@@ -1,6 +1,7 @@
 #include "Oscillator.h"
 #include <algorithm>
 #include <cmath>
+#include <random>
 
 namespace DSP
 {
@@ -53,6 +54,9 @@ void Oscillator::process(float* output, unsigned int numSamples)
             output[n] = dpwSaw();
             break;
 
+        case Noise:
+            output[n] = dpwNoise();
+
         default: break;
         }
 
@@ -84,6 +88,10 @@ float Oscillator::process()
 
     case SawAA:
         osc = dpwSaw();
+        break;
+
+    case Noise:
+        osc = dpwNoise();
         break;
 
     default: break;
@@ -147,6 +155,16 @@ float Oscillator::dpwTri()
 
     // apply compensation coeff and return
     return 2.f * (output * differentiatorCoeff) + 1.f;
+}
+
+
+float Oscillator::dpwNoise()
+{
+    std::random_device rd;  // Seed for the random number engine
+    std::mt19937 gen(rd()); // Mersenne Twister random number engine
+    std::uniform_real_distribution<float> dis(-1.0f, 1.0f); // Uniform distribution in the range [-1.0, 1.0]
+
+    return dis(gen);
 }
 
 }

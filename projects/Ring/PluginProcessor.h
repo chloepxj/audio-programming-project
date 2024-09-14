@@ -90,8 +90,8 @@ public:
 private:
     mrta::ParameterManager parameterManager;
     
-    // juce::Synthesiser synth;
-    // DSP::SynthVoice* voice { nullptr };   
+    juce::Synthesiser synth;
+    DSP::SynthVoice* voice { nullptr };   
 
     // LPF
     juce::dsp::LadderFilter<float> filter; 

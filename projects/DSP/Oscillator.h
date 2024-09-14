@@ -12,7 +12,8 @@ public:
         TriAliased,
         SawAliased,
         TriAA,
-        SawAA
+        SawAA,
+        Noise
     };
 
     Oscillator();
@@ -54,6 +55,7 @@ private:
 
     float dpwTri();
     float dpwSaw();
+    float dpwNoise();
 };
 
 }
