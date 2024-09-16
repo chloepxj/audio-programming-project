@@ -148,205 +148,249 @@ class OnePole {
 
 
 
-class Svf {
- public:
-  Svf() { }
-  ~Svf() { }
+class Svf 
+{
+public:
+    Svf() { }
+    ~Svf() { }
   
-  void Init() {
-    set_f_q<FREQUENCY_DIRTY>(0.01f, 100.0f);
-    Reset();
-  }
-  
-  void Reset() {
-    state_1_ = state_2_ = 0.0f;
-  }
-  
-  // Copy settings from another filter.
-  inline void set(const Svf& f) {
-    g_ = f.g();
-    r_ = f.r();
-    h_ = f.h();
-  }
-
-  // Set all parameters from LUT.
-  inline void set_g_r_h(float g, float r, float h) {
-    g_ = g;
-    r_ = r;
-    h_ = h;
-  }
-  
-  // Set frequency and resonance coefficients from LUT, adjust remaining
-  // parameter.
-  inline void set_g_r(float g, float r) {
-    g_ = g;
-    r_ = r;
-    h_ = 1.0f / (1.0f + r_ * g_ + g_ * g_);
-  }
-
-  // Set frequency from LUT, resonance in true units, adjust the rest.
-  inline void set_g_q(float g, float resonance) {
-    g_ = g;
-    r_ = 1.0f / resonance;
-    h_ = 1.0f / (1.0f + r_ * g_ + g_ * g_);
-  }
-
-  // Set frequency and resonance from true units. Various approximations
-  // are available to avoid the cost of tanf.
-  template<FrequencyApproximation approximation>
-  inline void set_f_q(float f, float resonance) {
-    g_ = OnePole::tan<approximation>(f);
-    r_ = 1.0f / resonance;
-    h_ = 1.0f / (1.0f + r_ * g_ + g_ * g_);
-  }
-  
-  template<FilterMode mode>
-  inline float Process(float in) {
-    float hp, bp, lp;
-    hp = (in - r_ * state_1_ - g_ * state_1_ - state_2_) * h_;
-    bp = g_ * hp + state_1_;
-    state_1_ = g_ * hp + bp;
-    lp = g_ * bp + state_2_;
-    state_2_ = g_ * bp + lp;
-    
-    if (mode == FILTER_MODE_LOW_PASS) {
-      return lp;
-    } else if (mode == FILTER_MODE_BAND_PASS) {
-      return bp;
-    } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
-      return bp * r_;
-    } else if (mode == FILTER_MODE_HIGH_PASS) {
-      return hp;
+    void Init() 
+    {
+        set_f_q<FREQUENCY_DIRTY>(0.01f, 100.0f);
+        Reset();
     }
-  }
   
-  template<FilterMode mode_1, FilterMode mode_2>
-  inline void Process(float in, float* out_1, float* out_2) {
-    float hp, bp, lp;
-    hp = (in - r_ * state_1_ - g_ * state_1_ - state_2_) * h_;
-    bp = g_ * hp + state_1_;
-    state_1_ = g_ * hp + bp;
-    lp = g_ * bp + state_2_;
-    state_2_ = g_ * bp + lp;
-    
-    if (mode_1 == FILTER_MODE_LOW_PASS) {
-      *out_1 = lp;
-    } else if (mode_1 == FILTER_MODE_BAND_PASS) {
-      *out_1 = bp;
-    } else if (mode_1 == FILTER_MODE_BAND_PASS_NORMALIZED) {
-      *out_1 = bp * r_;
-    } else if (mode_1 == FILTER_MODE_HIGH_PASS) {
-      *out_1 = hp;
+    void Reset() 
+    {
+        state_1_ = state_2_ = 0.0f;
+    }
+  
+    // Copy settings from another filter.
+    inline void set(const Svf& f) 
+    {
+        g_ = f.g();
+        r_ = f.r();
+        h_ = f.h();
     }
 
-    if (mode_2 == FILTER_MODE_LOW_PASS) {
-      *out_2 = lp;
-    } else if (mode_2 == FILTER_MODE_BAND_PASS) {
-      *out_2 = bp;
-    } else if (mode_2 == FILTER_MODE_BAND_PASS_NORMALIZED) {
-      *out_2 = bp * r_;
-    } else if (mode_2 == FILTER_MODE_HIGH_PASS) {
-      *out_2 = hp;
+    // Set all parameters from LUT.
+    inline void set_g_r_h(float g, float r, float h) 
+    {
+        g_ = g;
+        r_ = r;
+        h_ = h;
     }
-  }
   
-  template<FilterMode mode>
-  inline void Process(const float* in, float* out, size_t size) {
-    float hp, bp, lp;
-    float state_1 = state_1_;
-    float state_2 = state_2_;
-    
-    while (size--) {
-      hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-      bp = g_ * hp + state_1;
-      state_1 = g_ * hp + bp;
-      lp = g_ * bp + state_2;
-      state_2 = g_ * bp + lp;
-    
-      float value;
-      if (mode == FILTER_MODE_LOW_PASS) {
-        value = lp;
-      } else if (mode == FILTER_MODE_BAND_PASS) {
-        value = bp;
-      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
-        value = bp * r_;
-      } else if (mode == FILTER_MODE_HIGH_PASS) {
-        value = hp;
-      }
-      
-      *out = value;
-      ++out;
-      ++in;
+    // Set frequency and resonance coefficients from LUT, adjust remaining
+    // parameter.
+    inline void set_g_r(float g, float r) 
+    {
+        g_ = g;
+        r_ = r;
+        h_ = 1.0f / (1.0f + r_ * g_ + g_ * g_);
     }
-    state_1_ = state_1;
-    state_2_ = state_2;
-  }
-  
-  template<FilterMode mode>
-  inline void ProcessAdd(const float* in, float* out, size_t size, float gain) {
-    float hp, bp, lp;
-    float state_1 = state_1_;
-    float state_2 = state_2_;
-    
-    while (size--) {
-      hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-      bp = g_ * hp + state_1;
-      state_1 = g_ * hp + bp;
-      lp = g_ * bp + state_2;
-      state_2 = g_ * bp + lp;
-    
-      float value;
-      if (mode == FILTER_MODE_LOW_PASS) {
-        value = lp;
-      } else if (mode == FILTER_MODE_BAND_PASS) {
-        value = bp;
-      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
-        value = bp * r_;
-      } else if (mode == FILTER_MODE_HIGH_PASS) {
-        value = hp;
-      }
-      
-      *out += gain * value;
-      ++out;
-      ++in;
+
+    // Set frequency from LUT, resonance in true units, adjust the rest.
+    inline void set_g_q(float g, float resonance) 
+    {
+        g_ = g;
+        r_ = 1.0f / resonance;
+        h_ = 1.0f / (1.0f + r_ * g_ + g_ * g_);
+    } 
+
+    // Set frequency and resonance from true units. Various approximations
+    // are available to avoid the cost of tanf.
+    template<FrequencyApproximation approximation>
+    inline void set_f_q(float f, float resonance) 
+    {
+        g_ = OnePole::tan<approximation>(f);
+        r_ = 1.0f / resonance;
+        h_ = 1.0f / (1.0f + r_ * g_ + g_ * g_);
     }
-    state_1_ = state_1;
-    state_2_ = state_2;
-  }
   
-  template<FilterMode mode>
-  inline void Process(const float* in, float* out, size_t size, size_t stride) {
-    float hp, bp, lp;
-    float state_1 = state_1_;
-    float state_2 = state_2_;
-    
-    while (size--) {
-      hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-      bp = g_ * hp + state_1;
-      state_1 = g_ * hp + bp;
-      lp = g_ * bp + state_2;
-      state_2 = g_ * bp + lp;
-    
-      float value;
-      if (mode == FILTER_MODE_LOW_PASS) {
-        value = lp;
-      } else if (mode == FILTER_MODE_BAND_PASS) {
-        value = bp;
-      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
-        value = bp * r_;
-      } else if (mode == FILTER_MODE_HIGH_PASS) {
-        value = hp;
-      }
-      
-      *out = value;
-      out += stride;
-      in += stride;
+    template<FilterMode mode>
+    inline float Process(float in) {
+        float hp, bp, lp;
+        hp = (in - r_ * state_1_ - g_ * state_1_ - state_2_) * h_;
+        bp = g_ * hp + state_1_;
+        state_1_ = g_ * hp + bp;
+        lp = g_ * bp + state_2_;
+        state_2_ = g_ * bp + lp;
+
+        if (mode == FILTER_MODE_LOW_PASS) 
+        {
+            return lp;
+        }   
+        else if (mode == FILTER_MODE_BAND_PASS) 
+        {
+            return bp;
+        } 
+        else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) 
+        {
+            return bp * r_;
+        } 
+        else if (mode == FILTER_MODE_HIGH_PASS) 
+        {
+            return hp;
+        }
     }
-    state_1_ = state_1;
-    state_2_ = state_2;
-  }
+    
+    template<FilterMode mode_1, FilterMode mode_2>
+    inline void Process(float in, float* out_1, float* out_2) 
+    {
+        float hp, bp, lp;
+        hp = (in - r_ * state_1_ - g_ * state_1_ - state_2_) * h_;
+        bp = g_ * hp + state_1_;
+        state_1_ = g_ * hp + bp;
+        lp = g_ * bp + state_2_;
+        state_2_ = g_ * bp + lp;
+
+        if (mode_1 == FILTER_MODE_LOW_PASS) 
+        {
+            *out_1 = lp;
+        } 
+        else if (mode_1 == FILTER_MODE_BAND_PASS) 
+        {
+            *out_1 = bp;
+        } 
+        else if (mode_1 == FILTER_MODE_BAND_PASS_NORMALIZED) 
+        {
+            *out_1 = bp * r_;
+        } 
+        else if (mode_1 == FILTER_MODE_HIGH_PASS) 
+        {
+            *out_1 = hp;
+        }
+
+        if (mode_2 == FILTER_MODE_LOW_PASS) 
+        {
+            *out_2 = lp;
+        } 
+        else if (mode_2 == FILTER_MODE_BAND_PASS) 
+        {
+            *out_2 = bp;
+        } 
+        else if (mode_2 == FILTER_MODE_BAND_PASS_NORMALIZED) 
+        {
+            *out_2 = bp * r_;
+        } 
+        else if (mode_2 == FILTER_MODE_HIGH_PASS) 
+        {
+            *out_2 = hp;
+        }
+    }
+    
+    template<FilterMode mode>
+    inline void Process(const float* in, float* out, size_t size) 
+    {
+        float hp, bp, lp;
+        float state_1 = state_1_;
+        float state_2 = state_2_;
+
+        while (size--) 
+        {
+            hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+            bp = g_ * hp + state_1;
+            state_1 = g_ * hp + bp;
+            lp = g_ * bp + state_2;
+            state_2 = g_ * bp + lp;
+
+            float value;
+            
+            if (mode == FILTER_MODE_LOW_PASS) {
+                value = lp;
+            } 
+            else if (mode == FILTER_MODE_BAND_PASS) {
+                value = bp;
+            } 
+            else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+                value = bp * r_;
+            } 
+            else if (mode == FILTER_MODE_HIGH_PASS) {
+                value = hp;
+            }
+
+            *out = value;
+            ++out;
+            ++in;
+        } 
+        state_1_ = state_1;
+        state_2_ = state_2;
+    }
+    
+    template<FilterMode mode>
+    inline void ProcessAdd(const float* in, float* out, size_t size, float gain) {
+        float hp, bp, lp;
+        float state_1 = state_1_;
+        float state_2 = state_2_;
+
+        while (size--) {
+            hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+            bp = g_ * hp + state_1;
+            state_1 = g_ * hp + bp;
+            lp = g_ * bp + state_2;
+            state_2 = g_ * bp + lp;
+
+            float value;
+            if (mode == FILTER_MODE_LOW_PASS) {
+                value = lp;
+            } 
+            else if (mode == FILTER_MODE_BAND_PASS) {
+                value = bp;
+            } 
+            else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+                value = bp * r_;
+            } 
+            else if (mode == FILTER_MODE_HIGH_PASS) {
+                value = hp;
+            }
+
+            *out += gain * value;
+            ++out;
+            ++in;
+        }   
+        state_1_ = state_1;
+        state_2_ = state_2;
+    }
   
-  inline void ProcessMultimode(
+    template<FilterMode mode>
+    inline void Process(const float* in, float* out, size_t size, size_t stride) 
+    {
+        float hp, bp, lp;
+        float state_1 = state_1_;
+        float state_2 = state_2_;
+    
+        while (size--) 
+        {
+            hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+            bp = g_ * hp + state_1;
+            state_1 = g_ * hp + bp;
+            lp = g_ * bp + state_2;
+            state_2 = g_ * bp + lp;
+    
+            float value;
+            if (mode == FILTER_MODE_LOW_PASS) {
+                value = lp;
+            } 
+            else if (mode == FILTER_MODE_BAND_PASS) {
+                value = bp;
+            } 
+            else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+                value = bp * r_;
+            } 
+            else if (mode == FILTER_MODE_HIGH_PASS) {
+                value = hp;
+            }
+
+            *out = value;
+            out += stride;
+            in += stride;
+        }
+        state_1_ = state_1;
+        state_2_ = state_2;
+    }
+  
+    inline void ProcessMultimode(
       const float* in,
       float* out,
       size_t size,
@@ -369,9 +413,9 @@ class Svf {
     }
     state_1_ = state_1;
     state_2_ = state_2;
-  }
+    } 
   
-  inline void ProcessMultimodeLPtoHP(
+    inline void ProcessMultimodeLPtoHP(
       const float* in,
       float* out,
       size_t size,

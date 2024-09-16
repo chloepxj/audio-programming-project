@@ -60,15 +60,10 @@ private:
 
     int resolution {kMaxModes};
 
-
-    // int ComputeFilters();
-
     // StateVariableFilter array for each resonator mode
     // std::vector<DSP::StateVariableFilter> filters;  
     DSP::Svf svf[kMaxModes];
     // DSP::StateVariableFilter SVFs[kMaxModes];
-
-
 
 };
 

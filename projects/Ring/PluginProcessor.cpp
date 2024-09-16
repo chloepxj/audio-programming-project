@@ -157,13 +157,11 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
 {
     juce::ScopedNoDenormals noDenormals;
     parameterManager.updateParameters();
-    // float midiFreq = DSP::convertMidiNoteToFreq(int MidiMessage);
 
     const unsigned int numChannels{ static_cast<unsigned int>(buffer.getNumChannels()) };
     const unsigned int numSamples{ static_cast<unsigned int>(buffer.getNumSamples()) };
 
     // synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-
 
     {
         juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());

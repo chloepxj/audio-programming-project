@@ -21,7 +21,6 @@ void Resonator::prepare(double sampleRate)
     {
         //SVFs[i].prepare(sampleRate);
         svf[i].Init();
-        
     }
     
     setFrequency(220.0f);
@@ -48,22 +47,13 @@ void Resonator::process(float* const* output, const float* const* input, unsigne
         CosineOscillator amplitudes;
         amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position_.Next());
 
-        // float in = 0.125f * input[n];
         float odd;
         float even;
         amplitudes.Start();
         
         // copy one channel from input buffer
         float x = 0.125f * input[0][n];
-        // for (unsigned int ch = 0; ch < numChannels; ++ch)
-        // {
-        //     x[ch] = 0.125f * input[ch][n];
-        // }
-        // for (unsigned int ch = 0; ch < numChannels; ++ch)
-        // {
-            // output[ch][n] = lfo[ch] * input[ch][n];
-            //output[ch][n] = 0.125f * input[ch][n];
-
+   
         for (int i = 0; i < num_modes;) //process through each filter 
         {
             odd = amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x);
@@ -73,38 +63,9 @@ void Resonator::process(float* const* output, const float* const* input, unsigne
             output[1][n] += even;
 
         }
-        // }
-
-        
-        // output[1][n] += even;
 
     }
 }
-// void Resonator::process(const float* in, float* out, float* aux, size_t size)
-// {
-//     int num_modes = ComputeFilters();
-  
-//     ParameterInterpolator position_ (&previous_position, position, size);
-    
-//     while (size--) 
-//     {
-//         CosineOscillator amplitudes;
-//         amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position_.Next());
-
-//         float input = *in++ * 0.125f;
-//         float odd = 0.0f;
-//         float even = 0.0f;
-//         amplitudes.Start();
-
-//         for (int i = 0; i < num_modes;) //process through each filter 
-//         {
-//             odd += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
-//             even += amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(input);
-//         }
-//         *out++ = odd;
-//         *aux++ = even;
-//     }
-// }
 
 void Resonator::setFrequency(float freqHz)
 {
