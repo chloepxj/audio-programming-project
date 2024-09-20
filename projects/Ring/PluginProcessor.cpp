@@ -171,7 +171,6 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
     
     resonator.process(buffer.getArrayOfWritePointers(), buffer.getArrayOfReadPointers(), numChannels, numSamples);
 
-
     outputGain.applyGain(buffer, buffer.getNumSamples());
 }
 

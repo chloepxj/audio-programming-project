@@ -104,11 +104,12 @@ int Resonator::ComputeFilters()
     float stiffness = Interpolate(lut_stiffness, structure, 256.0f);
 
     float harmonic = frequency;
-    float stretch_factor = 1.0f;
+    float stretch_factor = 1.0f;  // inharmonicity factor B ~ [-0.06, 2]
 
     // test_q = Interpolate(lut_4_decades, damping, 256.0f);
     float q = 500.0f * Interpolate(lut_4_decades, damping, 256.0f);
-
+    
+    //  
     float brightness_attenuation = 1.0f - structure;
     // Reduces the range of brightness when structure is very low, to prevent
     // clipping.
@@ -119,8 +120,8 @@ int Resonator::ComputeFilters()
     float brightness_ = brightness * (1.0f - 0.2f * brightness_attenuation);
     float q_loss = brightness_ * (2.0f - brightness_) * 0.85f + 0.15f;
     float q_loss_damping_rate = structure * (2.0f - structure) * 0.1f;
-    int num_modes = 0;
     
+    int num_modes = 0;
 
     for (int i = 0; i < std::min(kMaxModes, resolution); ++i)  //0 ~ 64
     {
@@ -144,8 +145,8 @@ int Resonator::ComputeFilters()
         {
             // Make sure that the partials do not fold back into negative frequencies.
             stiffness *= 0.93f;
-        } 
-        else 
+        }
+        else
         {
             // This helps adding a few extra partials in the highest frequencies.
             stiffness *= 0.98f;
@@ -160,8 +161,5 @@ int Resonator::ComputeFilters()
     return num_modes;
 
 }   
-
-
-
 
 }
