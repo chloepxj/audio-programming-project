@@ -1,6 +1,6 @@
 .DS_Store
 
 # Ignore build directory
-build/
+/build
 
 .cache
