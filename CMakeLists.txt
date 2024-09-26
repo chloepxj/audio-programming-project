@@ -145,3 +145,22 @@ add_plugin(ringsynth
     INCLUDE_DIRS
         ${dsp_source}
         ${ring_source})
+
+
+
+# midi test project
+set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MidiTest)
+
+add_plugin(miditest
+    VERSION 0.1.0
+    PLUGIN_NAME "Midi Test"
+    PROD_NAME MidiTest
+    PROD_CODE Midi
+    SYNTH FALSE
+    SOURCES
+        ${midi_source}/PluginEditor.cpp
+        ${midi_source}/PluginProcessor.cpp
+        
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${midi_source})

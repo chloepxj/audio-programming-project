@@ -1,13 +1,11 @@
-# audio programming project
+<!-- # audio programming project -->
 
-## references
-
-[demo video on YouTube](https://www.youtube.com/watch?v=m27jSpFIRqA)
-
+# Modal Resonators for Real-Time Synthesis
+<!-- 
 ### Features of [Rings resonator](https://pichenettes.github.io/mutable-instruments-documentation/modules/rings/) (Three resonator models)
 1. **Modal resonator** (features are below)
-2. **Sympathetic strings**, modelled by a network of comb filters.
-3. **String with non-linearity/dispersion** (comb filter with multimode filter and non-linearities in the loop).
+2. **Sympathetic strings**, modelled by a network of comb filters. (TODO)
+3. **String with non-linearity/dispersion** (comb filter with multimode filter and non-linearities in the loop). (TODO)
 
 #### (main)[Modal resonator](https://pichenettes.github.io/mutable-instruments-documentation/modules/elements/#modal-resonator)
 - Internally uses 64 zero-delay feedback state variable filters.
@@ -16,68 +14,81 @@
 - **Brightness**. Specifies the character of the material the resonating structure is made of – from wood to glass, from nylon to steel.
 - **Damping**. Adds damping to the sound – simulates a wet material or the muting of the vibrations.
 - **Position**. Specifies at which point the structure is excited.
-- **Space**. Creates an increasingly rich stereo output by capturing the sound at two different points of the structure, and then adds more space through algorithmic reverberation.
+- **Space**. Creates an increasingly rich stereo output by capturing the sound at two different points of the structure, and then adds more space through algorithmic reverberation. -->
+
+
+## Screenshot
+![UI Screenshot](docs/UI.png)
+*Figure 1: User Interface Overview*
+
+- `Frequency`: Adjusts the frequency of the resonating sound.
+- `Structure`: Selects the material that the sound resonates with, including options such as plates, strings, tubes, and bowls.
+- `Brightness`: Defines the character of the resonating material, ranging from soft (e.g., wood) to sharp (e.g., glass or steel).
+- `Damping`: Adds damping to the sound, simulating effects like wetness or muting of vibrations.
+- `Position`: Controls the point of excitation on the structure.
+- `Post Gain`: Regulates the output volume.
+
+
+## Implementation
+
+![main processing block](docs/report/processBlock.png)
+
+*Figure 2: flow chart of the main process block*
+
+As shown in Figure 2, in `MainProcessor::processBlock`, input buffer first pass through a low-pass filter, which serves as the excitation signal for the resonator. After applying the output gain, we obtain the output signal.
+
+### Main Algorithm
+
+**Algorithm: Resonator::ComputeFilters()**
+
+- Interpolate stiffness and Q based on pre-calculated lookup tables.
+- Reduce the range of brightness to prevent clipping.
+- For i = 0 to min(kMaxModes, resolution):
+  - Calculate the partial frequency.
+  - Set the filter properties (frequency and quality factor Q).
+  - Adjust the stretch factor.
+- Return the number of modes.
+
+
+**Algorithm: Resonator::process()**
+
+- Compute the number of active modes.
+- Ramp the position.
+- Limit the number of output channels to 2.
+- For n = 0 to numSamples - 1:  *(Loop through each sample in the input buffer)*
+  - Initialize a Cosine Oscillator for amplitude modulation.
+  - Get the input sample, scaled by 0.125.
+  - For i = 0 to numModes - 1:  *(Process through each mode and apply filters)*
+    - Process odd mode and add to output channel 0.
+    - Process even mode and add to output channel 1.
+
+
+
+## More Details
+
+For more information and explanations, please refer to the [report](docs/report/APP_Report.pdf).
+
+
+
 
 ---
-<!-- 
-explaination of files in original repo that we need to use (gpt generated)
-### Summary of `voice.cc` and `voice.h`(elements/dsp/)
 
-The files `voice.cc` and `voice.h` implement a modal synthesis voice, which is a form of sound synthesis used to simulate the resonances of physical systems, such as musical instruments. The synthesis involves exciters like bow, blow, and strike exciters, which are modulated by different parameters, and a resonator to process the sound.
 
-#### 1. **`voice.h` (Header File)**
-   - This file defines the `Voice` class and its components.
-   - Key elements include:
-     - **Exciters**: The synthesis uses three types of exciters—bow, blow, and strike—to simulate different types of excitation methods for resonating bodies (e.g., bowing a string, blowing through a tube, or striking a surface).
-     - **Resonator Models**: Three different resonator models are available:
-       1. `RESONATOR_MODEL_MODAL`
-       2. `RESONATOR_MODEL_STRING`
-       3. `RESONATOR_MODEL_STRINGS`
-     - **Components of the Voice**: 
-       - `MultistageEnvelope`: An ADSR envelope for controlling amplitude over time.
-       - `Resonator`: Processes sound and produces the final output.
-       - `Tube`: Simulates tube-like resonators.
-       - `String`: Simulates string-like resonators.
-       - `Diffuser`: Adds spatial diffusion to the signal.
-     - **Methods**:
-       - `Init()`: Initializes the voice components.
-       - `Process()`: Processes the sound input, applying the exciters and resonators to produce output.
-       - `ResetResonator()`: Resets the resonator state.
-       - `GetGateFlags()`: Manages gate inputs for triggering events.
 
-#### 2. **`voice.cc` (Source File)**
-   - Implements the behavior and processing logic of the `Voice` class.
-   - **Initialization**:
-     - The `Init()` method initializes various components like the envelope, bow, blow, strike, diffuser, and resonator. It also sets the default parameters for the exciters and the resonator.
-   - **Exciter Configuration**:
-     - Different exciter models and parameters (e.g., timbre, strength) are configured for the bow, blow, and strike exciters based on the current patch (user-defined parameters).
-     - The envelope shape is dynamically adjusted depending on the patch settings.
-   - **Resonator Processing**:
-     - The resonator is set up based on the selected model (`RESONATOR_MODEL_MODAL` or `RESONATOR_MODEL_STRING`), and sound input is processed through the resonator to generate the final output.
-     - The resonator modulates sound characteristics like brightness, damping, and frequency.
-   - **Chords**:
-     - Predefined chord intervals are used for tuning the strings, allowing for polyphonic sound generation.
-   - **Strength and Zipper Noise Reduction**:
-     - The strength of excitation is interpolated to reduce zipper noise, a common artifact in digital audio processing.
-   - **Sound Blending**:
-     - The exciter outputs (bow, blow, strike) are combined with user inputs and modulated over time to generate the final sound output. 
-
-### Key Concepts
-   - **Exciters**: These simulate different methods of generating sound (bowing, blowing, or striking an instrument).
-   - **Resonators**: Act like physical bodies that respond to the exciters and modify the sound accordingly.
-   - **Modal Synthesis**: A technique where a physical model is used to simulate the vibrations of objects, often used for simulating acoustic instruments.
-   - **Chords**: Predefined sets of intervals for generating harmonic content in polyphonic mode.
-
-These files are part of a real-time audio processing system, likely for a synthesizer, and focus on modeling realistic instrument sounds through complex sound synthesis techniques. -->
-
---- 
-
-<!-- (add more about how to use the dsp classes in rings/dsp, which is the modal resonator part)
- -->
-
-TODO
+### TODO
 - midi handler
-- stereo
+- reverb (space)
+- stereo 
 - freqMod
 - GUI
 - polyphony ? 
+
+
+### references
+[demo video](https://www.youtube.com/watch?v=m27jSpFIRqA) from Mutable Instrument on YouTube
+
+- [Modal Synthesis Explanation](https://nathan.ho.name/posts/exploring-modal-synthesis/)
+
+- [Mutable Instruments (Elements)](https://pichenettes.github.io/mutable-instruments-documentation/modules/elements/manual/)
+
+- 
