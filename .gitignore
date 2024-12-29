@@ -1,8 +1,8 @@
 .DS_Store
-
-# Ignore build directory
-/build
-
+.vscode
 .cache
+JuceLibraryCode
+Builds
+build
 
 projects/MidiTest
