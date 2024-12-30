@@ -148,7 +148,7 @@ void MainProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     filter.setResonance(0);
     filter.setMode(static_cast<juce::dsp::LadderFilter<float>::Mode>(juce::dsp::LadderFilterMode::LPF24));
     
-    resonator.prepare(sampleRate);
+    resonator.prepare(sampleRate, numChannels);
     outputGain.reset(sampleRate, 0.01f);
     parameterManager.updateParameters(true);
 }

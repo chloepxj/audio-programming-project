@@ -140,8 +140,6 @@ add_plugin(ringsynth
         ${dsp_source}/Resources.cpp
         ${dsp_source}/SynthVoice.cpp
         ${dsp_source}/Oscillator.cpp
-
-        
     INCLUDE_DIRS
         ${dsp_source}
         ${ring_source})
@@ -149,18 +147,19 @@ add_plugin(ringsynth
 
 
 # midi test project
-set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MidiTest)
+set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Midi)
 
-add_plugin(miditest
+add_plugin(midi
     VERSION 0.1.0
-    PLUGIN_NAME "Midi Test"
-    PROD_NAME MidiTest
+    PLUGIN_NAME "Midi"
+    PROD_NAME Midi
     PROD_CODE Midi
-    SYNTH FALSE
+    SYNTH TRUE
     SOURCES
         ${midi_source}/PluginEditor.cpp
         ${midi_source}/PluginProcessor.cpp
-        
+        ${dsp_source}/SynthVoice.cpp
+        ${dsp_source}/Oscillator.cpp
     INCLUDE_DIRS
         ${dsp_source}
         ${midi_source})

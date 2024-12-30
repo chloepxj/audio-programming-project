@@ -1,13 +1,17 @@
 #include "Resonator.h"
-#include "Oscillator.h"
-#include "Resources.h"
-#include "Ramp.h"
-#include "SynthVoice.h"
-#include <string>
+// #include <CarbonCore/Gestalt.h>
+#include <algorithm>
+#include <cmath>
+
 
 namespace DSP {
 
-Resonator::Resonator()
+Resonator::Resonator():
+    freqRamp(0.02f),
+    strucRamp(0.02f),
+    brightness(0.02f),
+    posRamp(0.02f),
+    dampRamp(0.02f)
 {
 }
 
@@ -15,7 +19,7 @@ Resonator::~Resonator()
 {
 }
 
-void Resonator::prepare(double sampleRate)
+void Resonator::prepare(double newSampleRate, unsigned int numChannels)
 {
     for (int i = 0; i < kMaxModes; ++i) 
     {
@@ -23,74 +27,108 @@ void Resonator::prepare(double sampleRate)
         svf[i].Init();
     }
     
-    setFrequency(220.0f);
-    setStructure(0.25f);
-    setBrightness(0.5f);
-    setDamping(0.3f);
-    setPosition(0.999f);
+    // prepare ramps
+    freqRamp.prepare(newSampleRate, true, frequency);
+    strucRamp.prepare(newSampleRate, true, structure);
+    brightRamp.prepare(newSampleRate, true, brightness);
+    posRamp.prepare(newSampleRate, true, position);
+    dampRamp.prepare(newSampleRate, true, damping);
+
+    // setFrequency(220.0f);
+    // setStructure(0.25f);
+    // setBrightness(0.5f);
+    // setDamping(0.3f);
+    // setPosition(0.999f);
     previous_position = 0.0f;
+
     setResolution(kMaxModes);
+
+
+    phaseState[0] = 0.f;
+    phaseState[1] = static_cast<float>(M_PI / 2);
+    phaseInc = static_cast<float>(2.0 * M_PI) * position;
 
     // num_modes = ComputeFilters();
 }
+
+
 
 void Resonator::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)
 {
     int num_modes = ComputeFilters();
     
-    ParameterInterpolator position_ (&previous_position, position, static_cast<size_t>(numSamples));
+    // ParameterInterpolator position_ (&previous_position, position, static_cast<size_t>(numSamples));
     
-    numChannels = std::min(numChannels, 2u);
+    numChannels = std::min(numChannels, 2u); 
 
     for (unsigned int n = 0; n < numSamples; ++n)
     {
-        CosineOscillator amplitudes;
-        amplitudes.Init<COSINE_OSCILLATOR_APPROXIMATE>(position_.Next());
+        float lfo[2] {0.f, 0.f};
+        lfo[0] = std::pow(0.5f + 0.5f * std::sin(phaseState[0]), 2.f);
+        lfo[1] = std::pow(0.5f + 0.5f * std::sin(phaseState[1]), 2.f);
+
+        phaseState[0] = std::fmod(phaseState[0] + phaseInc, static_cast<float>(2 * M_PI));
+        phaseState[1] = std::fmod(phaseState[1] + phaseInc, static_cast<float>(2 * M_PI));
+
+        float x[2] {input[0][n], input[1][n]};
+        float y[2] {0.f, 0.f};        
 
         float odd;
-        float even;
-        amplitudes.Start();
-        
-        // copy one channel from input buffer
-        float x = 0.125f * input[0][n];
-   
+        float even;    
+        // loop thru each modes
+        // for the odd mode, ch0 is processed by svf[odd]
+        // for the even mode, ch1 is processed by svf[even]
         for (int i = 0; i < num_modes;) //process through each filter 
         {
-            odd = amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x);
-            output[0][n] += odd;
+            odd = svf[i++].Process<FILTER_MODE_BAND_PASS>(x[0]);
+            y[0] += odd;
 
-            even = amplitudes.Next() * svf[i++].Process<FILTER_MODE_BAND_PASS>(x);
-            output[1][n] += even;
-
+            even = svf[i++].Process<FILTER_MODE_BAND_PASS>(x[1]);
+            y[1] += even;
+            
         }
 
+        y[0] *= lfo[0];
+        y[1] *= lfo[1];
+
+        // Write to output buffers
+        for ( unsigned int ch = 0; ch < numChannels; ch++)
+        {
+            output[ch][n] = y[ch];
+        }
     }
 }
 
 void Resonator::setFrequency(float freqHz)
 {
     frequency = freqHz/sampleRate;
+    freqRamp.setTarget(frequency);
 }
 
 void Resonator::setStructure(float newStructure)
 {
     structure = newStructure;
     // stiffness = Interpolate(lut_stiffness, structure, 256.0f);
+    strucRamp.setTarget(structure);    
 }
 
 void Resonator::setBrightness(float newBrightness)
 {
     brightness = newBrightness;
+    brightRamp.setTarget(brightness);
 }
 
 void Resonator::setDamping(float newDamping)
 {
     damping = newDamping;
+    dampRamp.setTarget(damping);
 }
 
 void Resonator::setPosition(float newPosition)
 {
     position = newPosition;
+    posRamp.setTarget(position);
+    phaseInc = static_cast<float>(2.0 * M_PI) * position;
 }
 
 void Resonator::setResolution(int newResolution)
@@ -101,6 +139,8 @@ void Resonator::setResolution(int newResolution)
 
 int Resonator::ComputeFilters()
 {
+
+    // structure = strucRamp.applyGain(1, numChannels);
     float stiffness = Interpolate(lut_stiffness, structure, 256.0f);
 
     float harmonic = frequency;

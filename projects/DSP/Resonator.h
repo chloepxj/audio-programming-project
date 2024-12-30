@@ -1,4 +1,7 @@
 #pragma once
+#include "Ramp.h"
+#include "Resources.h"
+#include "Oscillator.h"
 
 #include "algorithm"
 #include "StateVariableFilter.h"
@@ -25,7 +28,7 @@ public:
     const Resonator& operator=(Resonator&&) = delete;
 
     // Update new sample rate
-    void prepare(double sampleRate);
+    void prepare(double newSampleRate, unsigned int numChannels);
 
     // Process resonator output for a buffer
     void process(const float* in, float* out, float* aux, size_t size);
@@ -58,8 +61,18 @@ private:
     float previous_position { 0.0f };
     float damping { 0.3f };
 
+    // Parameter ramps
+    DSP::Ramp<float> freqRamp;
+    DSP::Ramp<float> strucRamp;
+    DSP::Ramp<float> brightRamp;
+    DSP::Ramp<float> posRamp;
+    DSP::Ramp<float> dampRamp;
+
     int resolution {kMaxModes};
 
+    float phaseState[2] { 0.f, 0.f };
+    float phaseInc { 0.f };
+    
     // StateVariableFilter array for each resonator mode
     // std::vector<DSP::StateVariableFilter> filters;  
     DSP::Svf svf[kMaxModes];
